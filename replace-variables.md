@@ -29,11 +29,11 @@ This script is designed for Squarehero templates. It reads the CSS file for a sp
 ## Notes
 
 - The script replaces specific hex color values with HSL-based CSS variables linked to the Squarespace color palette. For example:
-  - `#FCF4EB` -> `hsla(var(--white-hsl), 1)`
+  - `#FFFFFF` -> `hsla(var(--white-hsl), 1)`
   - `#FCF5EB` -> `hsla(var(--lightAccent-hsl), 1)`
   - `#DD9833` -> `hsla(var(--accent-hsl), 1)`
   - `#616E30` -> `hsla(var(--darkAccent-hsl), 1)`
-  - `#353C2E` -> `hsla(var(--black-hsl), 1)`
+  - `#000000` -> `hsla(var(--black-hsl), 1)`
 
 - The script replaces specific media query variables. For example:
   - `@media @mobile` -> `@media only screen and (max-width: 750px)`

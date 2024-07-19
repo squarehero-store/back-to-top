@@ -28,11 +28,11 @@ fs.readFile(filePath, 'utf8', (err, data) => {
   }
 
   // Replacements for colors
-  let result = data.replace(/#FCF4EB/gi, 'hsla(var(--white-hsl), 1)');
+  let result = data.replace(/#ffffff/gi, 'hsla(var(--white-hsl), 1)');
   result = result.replace(/#FCF5EB/gi, 'hsla(var(--lightAccent-hsl), 1)');
   result = result.replace(/#DD9833/gi, 'hsla(var(--accent-hsl), 1)');
   result = result.replace(/#616E30/gi, 'hsla(var(--darkAccent-hsl), 1)');
-  result = result.replace(/#353C2E/gi, 'hsla(var(--black-hsl), 1)');
+  result = result.replace(/#000000/gi, 'hsla(var(--black-hsl), 1)');
 
   // Replacements for media queries
   result = result.replace(/@media @mobile/gi, '@media only screen and (max-width: 750px)');

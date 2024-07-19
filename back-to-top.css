@@ -1,0 +1,34 @@
+#backToTop {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background-color: hsla(var(--black-hsl), 1);
+  color: hsla(var(--white-hsl), 1);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#backToTop.visible {
+  opacity: 1;
+}
+#backToTop svg:first-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  transform: translate(-50%, -50%);
+}
+#backToTop svg:nth-child(2) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  stroke: hsla(var(--white-hsl), 1)!important;
+}
