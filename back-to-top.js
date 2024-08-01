@@ -1,7 +1,9 @@
 // ================================================
-//   ⚡ Back to Top plugin v0.1.0 by SquareHero 
+//   ⚡ Back to Top plugin by SquareHero.store
 // ================================================
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
+    console.info("🚀 SquareHero.store Back to Top plugin loaded");
+
     // Create back-to-top button
     const backToTopButton = document.createElement('button');
     backToTopButton.id = 'backToTop';
@@ -40,4 +42,4 @@ document.addEventListener('DOMContentLoaded', function() {
     backToTopButton.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-});
+})();
