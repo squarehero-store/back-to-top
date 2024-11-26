@@ -1,7 +1,6 @@
 #backToTop {
   position: fixed;
   bottom: 30px;
-  right: 30px;
   width: 50px;
   height: 50px;
   background-color: hsla(var(--black-hsl), 1);
@@ -15,6 +14,17 @@
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+/* Position variants */
+#backToTop.position-right {
+  right: 30px;
+}
+#backToTop.position-left {
+  left: 30px;
+}
+#backToTop.position-middle {
+  left: 50%;
+  transform: translateX(-50%);
 }
 #backToTop.visible {
   opacity: 1;
@@ -30,5 +40,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  stroke: hsla(var(--white-hsl), 1)!important;
+  stroke: hsla(var(--white-hsl), 1) !important;
+}
+/* Ensure middle position works with the progress circle */
+#backToTop.position-middle svg:first-child {
+  transform: translate(-50%, -50%);
 }

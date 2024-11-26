@@ -1,8 +1,15 @@
 // ================================================
-//   ⚡ Back to Top plugin by SquareHero.store
+//   ⚡ Scroll to Top plugin by SquareHero.store
 // ================================================
 (function() {
     console.info("🚀 SquareHero.store Back to Top plugin loaded");
+
+    // Get configuration from meta tag
+    const metaTag = document.querySelector('meta[squarehero-plugin="back-to-top"]');
+    const position = metaTag?.getAttribute('position')?.toLowerCase() || 'right';
+    const enabled = metaTag?.getAttribute('enabled')?.toLowerCase() !== 'false';
+
+    if (!enabled) return;
 
     // Create back-to-top button
     const backToTopButton = document.createElement('button');
@@ -15,6 +22,9 @@
             <circle cx="25" cy="25" r="20" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" id="progressCircle" />
         </svg>
     `;
+
+    // Add position-specific class
+    backToTopButton.classList.add(`position-${position}`);
     document.body.appendChild(backToTopButton);
 
     const progressCircle = document.getElementById('progressCircle');
