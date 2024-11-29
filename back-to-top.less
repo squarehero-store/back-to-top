@@ -5,7 +5,6 @@
   width: 50px;
   height: 50px;
   background-color: #000000;
-  color: #ffffff;
   border: none;
   border-radius: 50%;
   display: flex;
@@ -15,6 +14,11 @@
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+// THE ARROW
+.back-to-top-arrow path {
+  stroke:#ffffff;
 }
 
 /* Position variants */
@@ -47,7 +51,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  stroke: #ffffff !important;
+  .scroll-ring {
+    stroke: white;
+  }
+  
 }
 
 /* Ensure middle position works with the progress circle */

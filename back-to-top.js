@@ -1,8 +1,5 @@
-// ================================================
-//   ⚡ Scroll to Top plugin by SquareHero.store
-// ================================================
 (function() {
-    console.info("🚀 SquareHero.store Back to Top plugin loaded");
+    console.info("🚀 SquareHero.store Scroll to Top Button plugin by SquareHero.store loaded");
 
     // Get configuration from meta tag
     const metaTag = document.querySelector('meta[squarehero-plugin="back-to-top"]');
@@ -29,11 +26,11 @@
     const backToTopButton = document.createElement('button');
     backToTopButton.id = 'backToTop';
     backToTopButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 36">
+        <svg class="back-to-top-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 36">
             <path stroke="${getColorValue(arrowColor)}" stroke-miterlimit="10" stroke-width="1.887" d="M15.115 35.4V1.65M1.516 15.1l13.5-13.5 13.5 13.5"/>
         </svg>
         <svg width="50" height="50">
-            <circle cx="25" cy="25" r="20" stroke="${getColorValue(ringColor)}" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" id="progressCircle" />
+            <circle cx="25" cy="25" r="20" stroke="${getColorValue(ringColor)}" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" class="scroll-ring" id="progressCircle" />
         </svg>
     `;
 

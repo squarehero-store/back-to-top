@@ -4,7 +4,6 @@
   width: 50px;
   height: 50px;
   background-color: hsla(var(--black-hsl), 1);
-  color: hsla(var(--white-hsl), 1);
   border: none;
   border-radius: 50%;
   display: flex;
@@ -14,6 +13,9 @@
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+.back-to-top-arrow path {
+  stroke: hsla(var(--white-hsl), 1);
 }
 /* Position variants */
 #backToTop.position-right {
@@ -40,7 +42,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  stroke: hsla(var(--white-hsl), 1) !important;
+}
+#backToTop svg:nth-child(2) .scroll-ring {
+  stroke: white;
 }
 /* Ensure middle position works with the progress circle */
 #backToTop.position-middle svg:first-child {
