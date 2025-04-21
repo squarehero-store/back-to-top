@@ -255,14 +255,27 @@
             settingsScript.type = 'application/json'; // Specifying application/json type
             settingsScript.async = true;
             
+            // Add a timeout to ensure initialization happens even if the script loading events don't fire
+            const initTimeout = setTimeout(() => {
+                console.info("SquareHero Scroll to Top: Script load timeout reached, initializing with default settings");
+                if (!document.getElementById('backToTop')) {
+                    initWithSettings();
+                }
+            }, 2000); // Wait 2 seconds max for script loading
+            
             // Handle successful loading
             settingsScript.onload = function() {
                 console.info("SquareHero Scroll to Top: Settings script loaded successfully");
+                clearTimeout(initTimeout); // Clear the timeout since load event fired
                 
                 try {
                     // Try to parse JSON from the script content
                     const content = settingsScript.innerHTML || settingsScript.textContent;
-                    console.info(`SquareHero Scroll to Top: Script content: ${content}`);
+                    console.info(`SquareHero Scroll to Top: Script content: ${content ? 'Content found' : 'No content'}`);
+                    console.info(`SquareHero Scroll to Top: Script content length: ${content ? content.length : 0}`);
+                    if (content) {
+                        console.info(`SquareHero Scroll to Top: Script content preview: ${content.substring(0, 50)}...`);
+                    }
                     
                     if (!content) {
                         console.warn("SquareHero Scroll to Top: No content found in settings script, using default settings");
@@ -290,8 +303,16 @@
             // Handle loading failure
             settingsScript.onerror = function() {
                 console.warn("SquareHero Scroll to Top: Failed to load settings script, using default settings");
+                clearTimeout(initTimeout); // Clear the timeout since error event fired
                 initWithSettings();
             };
+            
+            // Try an alternative approach - load CSS to ensure back-to-top styles are applied
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/dashboard@v2.0.0-beta.1/plugins/scroll-to-top/back-to-top.min.css';
+            document.head.appendChild(cssLink);
+            console.info("SquareHero Scroll to Top: Added CSS stylesheet");
             
             // Add the script inside the plugin settings div
             console.info("SquareHero Scroll to Top: Adding script to plugin settings element");
