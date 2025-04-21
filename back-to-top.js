@@ -253,111 +253,224 @@
                 }
             }
             
-            // If we didn't find valid embedded settings, try to load the JSON file using XMLHttpRequest
-            console.info(`SquareHero Scroll to Top: Fetching settings from ${settingsUrl} using XMLHttpRequest`);
+            // If we didn't find valid embedded settings, try to load them using a fetch request
+            console.info(`SquareHero Scroll to Top: Fetching settings from ${settingsUrl}`);
             
             // Flag to track if we've already initialized
             let initialized = false;
             
-            // Create XMLHttpRequest to load the JSON file
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', settingsUrl, true);
-            xhr.timeout = 5000; // 5 second timeout
-            
-            // Handle successful response
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
+            // Load with fetch first - this is the modern approach
+            fetch(settingsUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(jsonContent => {
+                    console.info("SquareHero Scroll to Top: Successfully loaded settings with fetch");
+                    
+                    // Create a script tag to hold the settings
+                    const settingsScript = document.createElement('script');
+                    settingsScript.id = 'plugin-settings';
+                    settingsScript.type = 'application/json';
+                    settingsScript.textContent = jsonContent;
+                    
+                    // Remove any existing settings
+                    if (existingSettings) {
+                        existingSettings.remove();
+                    }
+                    
+                    // Add the settings to the container
+                    pluginData.appendChild(settingsScript);
+                    console.info("SquareHero Scroll to Top: Added settings to DOM");
+                    
+                    // Parse and use the settings
                     try {
-                        console.info("SquareHero Scroll to Top: Successfully loaded settings");
-                        const jsonContent = xhr.responseText;
-                        console.info(`SquareHero Scroll to Top: Settings content length: ${jsonContent.length}`);
+                        const config = JSON.parse(jsonContent);
                         
-                        // Create a script tag to hold the settings
-                        const settingsScript = document.createElement('script');
-                        settingsScript.id = 'plugin-settings';
-                        settingsScript.type = 'application/json';
-                        settingsScript.textContent = jsonContent;
-                        
-                        // Remove any existing settings
-                        if (existingSettings) {
-                            existingSettings.remove();
-                        }
-                        
-                        // Add the settings to the container
-                        pluginData.appendChild(settingsScript);
-                        console.info("SquareHero Scroll to Top: Added settings to DOM");
-                        
-                        // Parse and use the settings
-                        try {
-                            const config = JSON.parse(jsonContent);
-                            
-                            // Validate plugin ID
-                            if (config.plugin !== "scroll-to-top") {
-                                console.warn("SquareHero Scroll to Top: Invalid plugin configuration, using default settings");
-                                if (!initialized) {
-                                    initialized = true;
-                                    initWithSettings();
-                                }
-                                return;
-                            }
-                            
-                            console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings");
-                            if (!initialized) {
-                                initialized = true;
-                                initWithSettings(config);
-                            }
-                        } catch (error) {
-                            console.error("SquareHero Scroll to Top: Error parsing settings:", error);
+                        // Validate plugin ID
+                        if (config.plugin !== "scroll-to-top") {
+                            console.warn("SquareHero Scroll to Top: Invalid plugin configuration, using default settings");
                             if (!initialized) {
                                 initialized = true;
                                 initWithSettings();
                             }
+                            return;
+                        }
+                        
+                        console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings");
+                        if (!initialized) {
+                            initialized = true;
+                            initWithSettings(config);
                         }
                     } catch (error) {
-                        console.error("SquareHero Scroll to Top: Error processing response:", error);
+                        console.error("SquareHero Scroll to Top: Error parsing settings:", error);
                         if (!initialized) {
                             initialized = true;
                             initWithSettings();
                         }
                     }
-                } else {
-                    console.warn(`SquareHero Scroll to Top: Failed to load settings, status: ${xhr.status}, using default settings`);
-                    if (!initialized) {
-                        initialized = true;
-                        initWithSettings();
+                })
+                .catch(error => {
+                    console.warn("SquareHero Scroll to Top: Fetch failed, falling back to iframe method:", error);
+                    
+                    // If fetch fails, try the iframe approach as a fallback
+                    try {
+                        const iframeContainer = document.createElement('div');
+                        iframeContainer.style.display = 'none';
+                        iframeContainer.id = 'settings-iframe-container';
+                        document.body.appendChild(iframeContainer);
+                        
+                        // Create an iframe with sandbox to prevent downloads
+                        const iframe = document.createElement('iframe');
+                        iframe.sandbox = 'allow-same-origin'; // Very restrictive sandbox
+                        iframe.style.display = 'none';
+                        iframe.src = settingsUrl;
+                        
+                        iframe.onload = function() {
+                            try {
+                                console.info("SquareHero Scroll to Top: Settings iframe loaded");
+                                
+                                // Try to access the iframe content safely
+                                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                                
+                                if (!iframeDoc) {
+                                    console.warn("SquareHero Scroll to Top: Cannot access iframe document, using default settings");
+                                    if (!initialized) {
+                                        initialized = true;
+                                        initWithSettings();
+                                    }
+                                    return;
+                                }
+                                
+                                let jsonContent;
+                                
+                                // Different browsers handle JSON files differently in iframes
+                                if (iframeDoc.body && iframeDoc.body.textContent) {
+                                    // Most browsers will put JSON in the body
+                                    jsonContent = iframeDoc.body.textContent;
+                                } else if (iframeDoc.documentElement && iframeDoc.documentElement.textContent) {
+                                    // Some browsers might put it in the document element
+                                    jsonContent = iframeDoc.documentElement.textContent;
+                                } else if (iframeDoc.body && iframeDoc.body.innerText) {
+                                    // IE fallback
+                                    jsonContent = iframeDoc.body.innerText;
+                                } else {
+                                    // Can't find the content
+                                    console.warn("SquareHero Scroll to Top: Unable to extract content from iframe, using default settings");
+                                    if (!initialized) {
+                                        initialized = true;
+                                        initWithSettings();
+                                    }
+                                    return;
+                                }
+                                
+                                if (!jsonContent || jsonContent.trim() === '') {
+                                    console.warn("SquareHero Scroll to Top: No content found in iframe, using default settings");
+                                    if (!initialized) {
+                                        initialized = true;
+                                        initWithSettings();
+                                    }
+                                    return;
+                                }
+                                
+                                console.info(`SquareHero Scroll to Top: Retrieved iframe content, length: ${jsonContent.length}`);
+                                
+                                // Create a script tag to hold the settings
+                                const settingsScript = document.createElement('script');
+                                settingsScript.id = 'plugin-settings';
+                                settingsScript.type = 'application/json';
+                                settingsScript.textContent = jsonContent;
+                                
+                                // Remove any existing settings
+                                if (existingSettings) {
+                                    existingSettings.remove();
+                                }
+                                
+                                // Add the settings to the container
+                                pluginData.appendChild(settingsScript);
+                                console.info("SquareHero Scroll to Top: Added settings to DOM");
+                                
+                                // Parse and use the settings
+                                try {
+                                    const config = JSON.parse(jsonContent);
+                                    
+                                    // Validate plugin ID
+                                    if (config.plugin !== "scroll-to-top") {
+                                        console.warn("SquareHero Scroll to Top: Invalid plugin configuration, using default settings");
+                                        if (!initialized) {
+                                            initialized = true;
+                                            initWithSettings();
+                                        }
+                                        return;
+                                    }
+                                    
+                                    console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings");
+                                    if (!initialized) {
+                                        initialized = true;
+                                        initWithSettings(config);
+                                    }
+                                } catch (error) {
+                                    console.error("SquareHero Scroll to Top: Error parsing settings:", error);
+                                    if (!initialized) {
+                                        initialized = true;
+                                        initWithSettings();
+                                    }
+                                }
+                            } catch (error) {
+                                console.error("SquareHero Scroll to Top: Error accessing iframe content:", error);
+                                if (!initialized) {
+                                    initialized = true;
+                                    initWithSettings();
+                                }
+                            } finally {
+                                // Clean up iframe
+                                try {
+                                    iframeContainer.removeChild(iframe);
+                                    document.body.removeChild(iframeContainer);
+                                } catch (e) {
+                                    console.warn("SquareHero Scroll to Top: Error removing iframe:", e);
+                                }
+                            }
+                        };
+                        
+                        iframe.onerror = function() {
+                            console.warn("SquareHero Scroll to Top: Failed to load settings iframe, using default settings");
+                            if (!initialized) {
+                                initialized = true;
+                                initWithSettings();
+                            }
+                            
+                            // Clean up
+                            try {
+                                iframeContainer.removeChild(iframe);
+                                document.body.removeChild(iframeContainer);
+                            } catch (e) {
+                                console.warn("SquareHero Scroll to Top: Error removing iframe:", e);
+                            }
+                        };
+                        
+                        // Add the iframe to load the JSON
+                        iframeContainer.appendChild(iframe);
+                        console.info("SquareHero Scroll to Top: Added iframe to load settings");
+                    } catch (iframeError) {
+                        console.error("SquareHero Scroll to Top: Error with iframe approach:", iframeError);
+                        if (!initialized) {
+                            initialized = true;
+                            initWithSettings();
+                        }
                     }
-                }
-            };
+                });
             
-            // Handle request errors
-            xhr.onerror = function() {
-                console.warn("SquareHero Scroll to Top: Network error, could not load settings, using default settings");
-                if (!initialized) {
-                    initialized = true;
-                    initWithSettings();
-                }
-            };
-            
-            // Handle timeouts
-            xhr.ontimeout = function() {
-                console.warn("SquareHero Scroll to Top: Request timed out, using default settings");
-                if (!initialized) {
-                    initialized = true;
-                    initWithSettings();
-                }
-            };
-            
-            // Send the request
-            xhr.send();
-            
-            // Use a shorter timeout to ensure we initialize if XHR takes too long
+            // Set a timeout to ensure we initialize if loading takes too long
             setTimeout(function() {
                 if (!initialized) {
-                    console.warn("SquareHero Scroll to Top: Settings loading is taking too long, using default settings for now");
+                    console.warn("SquareHero Scroll to Top: Settings loading timed out, using default settings");
                     initialized = true;
                     initWithSettings();
                 }
-            }, 1000); // 1 second backup timeout
+            }, 1500); // 1.5 second timeout
             
         } catch (error) {
             console.error("SquareHero Scroll to Top: Unexpected error during initialization, using default settings", error);
