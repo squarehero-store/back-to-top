@@ -27,29 +27,29 @@
     };
 
     // Get color value based on slot or hex value
-    const getColorValue = (colorSetting, settings) => {
-        // First, check if the setting itself is a direct value in the settings object
-        // This handles cases like settings.circle = "#82ff05"
-        if (settings[colorSetting] && settings[colorSetting].startsWith('#')) {
-            console.info(`SquareHero Scroll to Top: Using direct color value ${settings[colorSetting]} for ${colorSetting}`);
-            return settings[colorSetting];
+    const getColorValue = (colorType, settings) => {
+        // Get the value from settings for this color type (background, circle, or arrow)
+        const colorValue = settings[colorType];
+        
+        // If it's a direct hex color
+        if (colorValue && colorValue.startsWith('#')) {
+            console.info(`SquareHero Scroll to Top: Using direct hex color ${colorValue} for ${colorType}`);
+            return colorValue;
         }
         
-        // If the setting is a slot reference
-        if (settings[colorSetting] && settings[colorSetting].startsWith('slot')) {
-            console.info(`SquareHero Scroll to Top: Using theme slot color for ${colorSetting}`);
-            return colorSlots[settings[colorSetting]] || colorSlots.slot1;
+        // If it's a slot reference
+        if (colorValue && colorValue.startsWith('slot')) {
+            console.info(`SquareHero Scroll to Top: Using theme slot color ${colorValue} for ${colorType}: ${colorSlots[colorValue]}`);
+            return colorSlots[colorValue] || colorSlots.slot1;
         }
         
-        // If the setting itself is a slot reference
-        if (colorSetting.startsWith('slot')) {
-            console.info(`SquareHero Scroll to Top: Using theme slot color for ${colorSetting}`);
-            return colorSlots[colorSetting] || colorSlots.slot1;
-        }
+        // Fallback to default slots if no valid value found
+        const defaultSlot = colorType === 'arrow' ? 'slot1' : 
+                           colorType === 'circle' ? 'slot3' : 
+                           colorType === 'background' ? 'slot5' : 'slot1';
         
-        // Fallback to slot1 (white) if we can't determine the color
-        console.warn(`SquareHero Scroll to Top: Couldn't determine color for ${colorSetting}, using default`);
-        return colorSlots.slot1;
+        console.warn(`SquareHero Scroll to Top: No valid color for ${colorType}, using default ${defaultSlot}`);
+        return colorSlots[defaultSlot];
     };
 
     // Function to initialize with settings
