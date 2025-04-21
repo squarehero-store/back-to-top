@@ -19,15 +19,17 @@
 
     // Color palette mapping function
     const colorSlots = {
-        slot1: 'hsla(var(--white-hsl), 1)',
-        slot2: 'hsla(var(--lightAccent-hsl), 1)',
-        slot3: 'hsla(var(--accent-hsl), 1)',
-        slot4: 'hsla(var(--darkAccent-hsl), 1)', 
-        slot5: 'hsla(var(--black-hsl), 1)'
+        slot1: 'hsla(var(--white-hsl), 1)',          // White
+        slot2: 'hsla(var(--lightAccent-hsl), 1)',    // Light Accent
+        slot3: 'hsla(var(--accent-hsl), 1)',         // Accent
+        slot4: 'hsla(var(--darkAccent-hsl), 1)',     // Dark Accent
+        slot5: 'hsla(var(--black-hsl), 1)'           // Black
     };
 
     // Get color value based on slot or hex value
     const getColorValue = (colorType, settings) => {
+        console.info(`SquareHero Scroll to Top: Getting color value for ${colorType}. Setting value: ${settings[colorType]}`);
+        
         // Get the value from settings for this color type (background, circle, or arrow)
         const colorValue = settings[colorType];
         
@@ -39,17 +41,19 @@
         
         // If it's a slot reference
         if (colorValue && colorValue.startsWith('slot')) {
-            console.info(`SquareHero Scroll to Top: Using theme slot color ${colorValue} for ${colorType}: ${colorSlots[colorValue]}`);
-            return colorSlots[colorValue] || colorSlots.slot1;
+            const slotColor = colorSlots[colorValue];
+            console.info(`SquareHero Scroll to Top: Using theme slot color ${colorValue} for ${colorType}. Color value: ${slotColor}`);
+            return slotColor || colorSlots.slot1;
         }
         
         // Fallback to default slots if no valid value found
         const defaultSlot = colorType === 'arrow' ? 'slot1' : 
                            colorType === 'circle' ? 'slot3' : 
                            colorType === 'background' ? 'slot5' : 'slot1';
+        const defaultColor = colorSlots[defaultSlot];
         
-        console.warn(`SquareHero Scroll to Top: No valid color for ${colorType}, using default ${defaultSlot}`);
-        return colorSlots[defaultSlot];
+        console.warn(`SquareHero Scroll to Top: No valid color for ${colorType}, using default ${defaultSlot}: ${defaultColor}`);
+        return defaultColor;
     };
 
     // Function to initialize with settings
