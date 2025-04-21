@@ -41,8 +41,11 @@
 
     // Function to initialize with settings
     function initWithSettings(config = null) {
+        console.info("SquareHero Scroll to Top: initWithSettings called", config ? "with custom settings" : "with default settings");
+        
         // Use default settings if config is null or not provided
         const settings = (config && config.settings) || defaultSettings;
+        console.info("SquareHero Scroll to Top: Using settings:", JSON.stringify(settings, null, 2));
         
         // Check if enabled
         if (settings.enabled === false) {
@@ -51,6 +54,7 @@
         }
         
         // Create back-to-top button
+        console.info("SquareHero Scroll to Top: Creating back-to-top button");
         const backToTopButton = document.createElement('button');
         backToTopButton.id = 'backToTop';
         
@@ -58,11 +62,13 @@
         if (settings.size) {
             backToTopButton.style.width = `${settings.size}px`;
             backToTopButton.style.height = `${settings.size}px`;
+            console.info(`SquareHero Scroll to Top: Set button size to ${settings.size}px`);
         }
         
         // Apply bottom margin if provided
         if (settings.bottom) {
             backToTopButton.style.bottom = `${settings.bottom}px`;
+            console.info(`SquareHero Scroll to Top: Set button bottom margin to ${settings.bottom}px`);
         }
         
         // Get colors
@@ -70,12 +76,15 @@
         const circleColor = getColorValue(settings.circle || 'slot3', settings);
         const backgroundColor = getColorValue(settings.background || 'slot5', settings);
         
+        console.info(`SquareHero Scroll to Top: Using colors - arrow: ${arrowColor}, circle: ${circleColor}, background: ${backgroundColor}`);
+        
         // Set background color
         backToTopButton.style.backgroundColor = backgroundColor;
         
         // Apply shadow if enabled
         if (settings.shadow) {
             backToTopButton.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+            console.info("SquareHero Scroll to Top: Applied shadow to button");
         }
         
         backToTopButton.innerHTML = `
@@ -90,7 +99,20 @@
         // Add position-specific class
         const position = settings.position || 'right';
         backToTopButton.classList.add(`position-${position}`);
+        console.info(`SquareHero Scroll to Top: Set button position to ${position}`);
+        
+        console.info("SquareHero Scroll to Top: Appending button to document body");
         document.body.appendChild(backToTopButton);
+        console.info("SquareHero Scroll to Top: Button added to DOM");
+        
+        // Verify button is in DOM
+        setTimeout(() => {
+            const buttonInDOM = document.getElementById('backToTop');
+            console.info(`SquareHero Scroll to Top: Button in DOM check: ${buttonInDOM ? 'Yes' : 'No'}`);
+            if (!buttonInDOM) {
+                console.warn("SquareHero Scroll to Top: Button was not found in DOM after adding it");
+            }
+        }, 100);
 
         const progressCircle = document.getElementById('progressCircle');
         const circumference = progressCircle.r.baseVal.value * 2 * Math.PI;
