@@ -28,14 +28,27 @@
 
     // Get color value based on slot or hex value
     const getColorValue = (colorSetting, settings) => {
+        // First, check if the setting itself is a direct value in the settings object
+        // This handles cases like settings.circle = "#82ff05"
+        if (settings[colorSetting] && settings[colorSetting].startsWith('#')) {
+            console.info(`SquareHero Scroll to Top: Using direct color value ${settings[colorSetting]} for ${colorSetting}`);
+            return settings[colorSetting];
+        }
+        
+        // If the setting is a slot reference
+        if (settings[colorSetting] && settings[colorSetting].startsWith('slot')) {
+            console.info(`SquareHero Scroll to Top: Using theme slot color for ${colorSetting}`);
+            return colorSlots[settings[colorSetting]] || colorSlots.slot1;
+        }
+        
+        // If the setting itself is a slot reference
         if (colorSetting.startsWith('slot')) {
+            console.info(`SquareHero Scroll to Top: Using theme slot color for ${colorSetting}`);
             return colorSlots[colorSetting] || colorSlots.slot1;
         }
-        // Check for hex color values
-        const hexKey = `${colorSetting}-hex`;
-        if (settings[hexKey]) {
-            return settings[hexKey];
-        }
+        
+        // Fallback to slot1 (white) if we can't determine the color
+        console.warn(`SquareHero Scroll to Top: Couldn't determine color for ${colorSetting}, using default`);
         return colorSlots.slot1;
     };
 
