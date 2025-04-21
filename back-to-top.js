@@ -182,12 +182,19 @@
         return;
     }
 
+    // Set up the URL for the settings file
+    const settingsUrl = `/s/squarehero-scroll-to-top-settings-${settingsId}.json`;
+    console.info(`SquareHero Scroll to Top: Attempting to fetch settings from: ${settingsUrl}`);
+    console.info(`SquareHero Scroll to Top: Full URL being requested: ${window.location.origin}${settingsUrl}`);
+
     // Try to fetch configuration from JSON file
-    fetch(`/s/squarehero-scroll-to-top-settings-${settingsId}.json`)
+    fetch(settingsUrl)
         .then(response => {
             if (!response.ok) {
+                console.warn(`SquareHero Scroll to Top: Failed to fetch settings: ${response.status} ${response.statusText}`);
                 throw new Error(`Failed to fetch settings: ${response.status}`);
             }
+            console.info("SquareHero Scroll to Top: Settings file found and loaded successfully");
             return response.json();
         })
         .then(config => {
@@ -198,6 +205,7 @@
                 return;
             }
 
+            console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings:", config.settings);
             // Initialize with the fetched config
             initWithSettings(config);
         })
