@@ -26,36 +26,6 @@
         slot5: 'hsla(var(--black-hsl), 1)'           // Black
     };
 
-    // Get color value based on slot or hex value
-    const getColorValue = (colorType, settings) => {
-        console.info(`SquareHero Scroll to Top: Getting color value for ${colorType}. Setting value: ${settings[colorType]}`);
-        
-        // Get the value from settings for this color type (background, circle, or arrow)
-        const colorValue = settings[colorType];
-        
-        // If it's a direct hex color
-        if (colorValue && colorValue.startsWith('#')) {
-            console.info(`SquareHero Scroll to Top: Using direct hex color ${colorValue} for ${colorType}`);
-            return colorValue;
-        }
-        
-        // If it's a slot reference
-        if (colorValue && colorValue.startsWith('slot')) {
-            const slotColor = colorSlots[colorValue];
-            console.info(`SquareHero Scroll to Top: Using theme slot color ${colorValue} for ${colorType}. Color value: ${slotColor}`);
-            return slotColor || colorSlots.slot1;
-        }
-        
-        // Fallback to default slots if no valid value found
-        const defaultSlot = colorType === 'arrow' ? 'slot1' : 
-                           colorType === 'circle' ? 'slot3' : 
-                           colorType === 'background' ? 'slot5' : 'slot1';
-        const defaultColor = colorSlots[defaultSlot];
-        
-        console.warn(`SquareHero Scroll to Top: No valid color for ${colorType}, using default ${defaultSlot}: ${defaultColor}`);
-        return defaultColor;
-    };
-
     // Function to initialize with settings
     function initWithSettings(config = null) {
         console.info("SquareHero Scroll to Top: initWithSettings called", config ? "with custom settings" : "with default settings");
@@ -88,12 +58,47 @@
             console.info(`SquareHero Scroll to Top: Set button bottom margin to ${settings.bottom}px`);
         }
         
-        // Get colors
-        const arrowColor = getColorValue(settings.arrow || 'slot1', settings);
-        const circleColor = getColorValue(settings.circle || 'slot3', settings);
-        const backgroundColor = getColorValue(settings.background || 'slot5', settings);
+        // Get colors directly from settings
+        console.info(`SquareHero Scroll to Top: Raw color settings - arrow: ${settings.arrow}, circle: ${settings.circle}, background: ${settings.background}`);
         
-        console.info(`SquareHero Scroll to Top: Using colors - arrow: ${arrowColor}, circle: ${circleColor}, background: ${backgroundColor}`);
+        // Process arrow color
+        let arrowColor = settings.arrow;
+        if (arrowColor && arrowColor.startsWith('slot')) {
+            arrowColor = colorSlots[arrowColor];
+            console.info(`SquareHero Scroll to Top: Translated arrow slot to: ${arrowColor}`);
+        }
+        
+        // Process circle color
+        let circleColor = settings.circle;
+        if (circleColor && circleColor.startsWith('slot')) {
+            circleColor = colorSlots[circleColor];
+            console.info(`SquareHero Scroll to Top: Translated circle slot to: ${circleColor}`);
+        } else if (circleColor && circleColor.startsWith('#')) {
+            console.info(`SquareHero Scroll to Top: Using direct hex color for circle: ${circleColor}`);
+        }
+        
+        // Process background color
+        let backgroundColor = settings.background;
+        if (backgroundColor && backgroundColor.startsWith('slot')) {
+            backgroundColor = colorSlots[backgroundColor];
+            console.info(`SquareHero Scroll to Top: Translated background slot to: ${backgroundColor}`);
+        }
+        
+        // Set defaults if needed
+        if (!arrowColor) {
+            arrowColor = colorSlots.slot1;
+            console.info(`SquareHero Scroll to Top: Using default white for arrow`);
+        }
+        if (!circleColor) {
+            circleColor = colorSlots.slot3;
+            console.info(`SquareHero Scroll to Top: Using default accent for circle`);
+        }
+        if (!backgroundColor) {
+            backgroundColor = colorSlots.slot5;
+            console.info(`SquareHero Scroll to Top: Using default black for background`);
+        }
+        
+        console.info(`SquareHero Scroll to Top: Final colors - arrow: ${arrowColor}, circle: ${circleColor}, background: ${backgroundColor}`);
         
         // Set background color
         backToTopButton.style.backgroundColor = backgroundColor;
