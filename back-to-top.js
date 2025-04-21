@@ -112,6 +112,21 @@
             if (!buttonInDOM) {
                 console.warn("SquareHero Scroll to Top: Button was not found in DOM after adding it");
             }
+            
+            // Apply additional CSS for color styling
+            const styleElement = document.createElement('style');
+            styleElement.id = 'squarehero-scroll-to-top-styles';
+            styleElement.textContent = `
+                #backToTop .scroll-ring, #backToTop #progressCircle {
+                    stroke: ${circleColor} !important;
+                }
+                #backToTop .back-to-top-arrow path {
+                    stroke: ${arrowColor} !important;
+                }
+            `;
+            document.head.appendChild(styleElement);
+            console.info("SquareHero Scroll to Top: Added custom style element for colors");
+            
         }, 100);
 
         const progressCircle = document.getElementById('progressCircle');
