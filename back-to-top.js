@@ -1,7 +1,7 @@
 (function() {
     console.info("🚀 SquareHero.store Scroll to Top Button plugin by SquareHero.store loaded");
 
-    // Default settings to use if JSON settings aren't found
+    // Default settings to use if embedded settings aren't found
     const defaultSettings = {
         enabled: true,
         position: 'right',
@@ -174,76 +174,77 @@
     // Main initialization function
     function initPlugin() {
         try {
-            // STEP 1: Create the HTML layout for settings if it doesn't exist
-            let settingsContainer = document.getElementById('squarehero-settings');
-            if (!settingsContainer) {
-                console.info("SquareHero Scroll to Top: Creating settings container");
-                settingsContainer = document.createElement('div');
-                settingsContainer.id = 'squarehero-settings';
-                settingsContainer.style.display = 'none';
-                
-                // Check if body exists before appending
-                if (document.body) {
-                    document.body.appendChild(settingsContainer);
-                } else {
-                    console.warn("SquareHero Scroll to Top: Document body not available yet, using default settings");
-                    initWithSettings();
-                    return;
-                }
-            }
-
+            console.info("SquareHero Scroll to Top: Starting initialization");
+            
             // Get settings ID from script tag
             const scriptTag = document.querySelector('script[data-squarehero-plugin="scroll-to-top"]');
             const settingsId = scriptTag?.getAttribute('settings');
             
             if (!settingsId) {
-                console.warn("SquareHero Scroll to Top: Settings ID not found in script tag, using default settings");
+                console.warn("SquareHero Scroll to Top: No settings ID found in script tag, using default settings");
                 initWithSettings();
                 return;
             }
-
-            // Create the settings element if it doesn't exist
+            
+            console.info(`SquareHero Scroll to Top: Found settings ID in script tag: ${settingsId}`);
+            
+            // Create container for settings if it doesn't exist
+            let settingsContainer = document.getElementById('squarehero-settings');
+            if (!settingsContainer) {
+                settingsContainer = document.createElement('div');
+                settingsContainer.id = 'squarehero-settings';
+                settingsContainer.style.display = 'none';
+                document.body.appendChild(settingsContainer);
+            }
+            
+            // Create the scroll-to-top settings element if it doesn't exist
             let pluginSettings = settingsContainer.querySelector('.scroll-to-top-settings');
             if (!pluginSettings) {
                 pluginSettings = document.createElement('div');
                 pluginSettings.className = 'scroll-to-top-settings';
                 settingsContainer.appendChild(pluginSettings);
             }
-
-            // Set the settings URL
+            
+            // Set the URL as a data attribute for reference
             const settingsUrl = `/s/squarehero-scroll-to-top-settings-${settingsId}.json`;
             pluginSettings.setAttribute('data-settings-url', settingsUrl);
             
-            console.info(`SquareHero Scroll to Top: Settings URL set to ${settingsUrl}`);
-
-            // STEP 2: Read the JSON file
-            console.info(`SquareHero Scroll to Top: Fetching settings from ${settingsUrl}`);
+            // Use a standard XMLHttpRequest to load the JSON
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', settingsUrl, true);
             
-            fetch(settingsUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        console.warn(`SquareHero Scroll to Top: Failed to fetch settings: ${response.status} ${response.statusText}`);
-                        throw new Error(`Failed to fetch settings: ${response.status}`);
-                    }
-                    console.info("SquareHero Scroll to Top: Settings file found and loaded successfully");
-                    return response.json();
-                })
-                .then(config => {
-                    // Validate plugin ID
-                    if (config.plugin !== "scroll-to-top") {
-                        console.warn("SquareHero Scroll to Top: Invalid plugin configuration, using default settings");
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const config = JSON.parse(xhr.responseText);
+                        
+                        // Validate plugin ID
+                        if (config.plugin !== "scroll-to-top") {
+                            console.warn("SquareHero Scroll to Top: Invalid plugin configuration, using default settings");
+                            initWithSettings();
+                            return;
+                        }
+                        
+                        console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings");
+                        initWithSettings(config);
+                    } catch (error) {
+                        console.error("SquareHero Scroll to Top: Error parsing settings:", error);
                         initWithSettings();
-                        return;
                     }
-
-                    console.info("SquareHero Scroll to Top: Valid configuration found, initializing with settings");
-                    // Initialize with the fetched config
-                    initWithSettings(config);
-                })
-                .catch(error => {
-                    console.error("SquareHero Scroll to Top: Error loading configuration, using default settings", error);
+                } else {
+                    console.warn(`SquareHero Scroll to Top: Failed to load settings (status ${xhr.status}), using default settings`);
                     initWithSettings();
-                });
+                }
+            };
+            
+            xhr.onerror = function() {
+                console.warn("SquareHero Scroll to Top: Failed to load settings, using default settings");
+                initWithSettings();
+            };
+            
+            // Send the request
+            xhr.send();
+            
         } catch (error) {
             console.error("SquareHero Scroll to Top: Unexpected error during initialization, using default settings", error);
             initWithSettings();
