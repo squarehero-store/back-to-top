@@ -7,6 +7,7 @@
     const enabled = metaTag?.getAttribute('enabled')?.toLowerCase() !== 'false';
     const ringColor = metaTag?.getAttribute('ring') || '1';
     const arrowColor = metaTag?.getAttribute('arrow') || '1';
+    const reverse = metaTag?.getAttribute('reverse')?.toLowerCase() === 'true';
 
     if (!enabled) return;
 
@@ -27,7 +28,7 @@
     backToTopButton.id = 'backToTop';
     backToTopButton.innerHTML = `
         <svg class="back-to-top-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 36">
-            <path stroke="${getColorValue(arrowColor)}" stroke-miterlimit="10" stroke-width="1.887" d="M15.115 35.4V1.65M1.516 15.1l13.5-13.5 13.5 13.5"/>
+            <path stroke="${getColorValue(arrowColor)}" stroke-miterlimit="10" stroke-width="1.887" d="${reverse ? 'M15.115 1.65V35.4M1.516 21.9l13.5 13.5 13.5-13.5' : 'M15.115 35.4V1.65M1.516 15.1l13.5-13.5 13.5 13.5'}"/>
         </svg>
         <svg width="50" height="50">
             <circle cx="25" cy="25" r="20" stroke="${getColorValue(ringColor)}" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" class="scroll-ring" id="progressCircle" />
@@ -53,14 +54,34 @@
         const scrollPercent = (scrollPosition / scrollTotal) * 100;
         setProgress(scrollPercent);
 
-        if (scrollPosition > 100) {
-            backToTopButton.classList.add('visible');
+        if (reverse) {
+            // For scroll to bottom: show when not at bottom
+            const nearBottom = scrollPosition + window.innerHeight + 100 >= document.documentElement.scrollHeight;
+            if (!nearBottom) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
         } else {
-            backToTopButton.classList.remove('visible');
+            // Original behavior: show when scrolled down
+            if (scrollPosition > 100) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
         }
     });
 
     backToTopButton.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (reverse) {
+            // Scroll to bottom
+            window.scrollTo({ 
+                top: document.documentElement.scrollHeight, 
+                behavior: 'smooth' 
+            });
+        } else {
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     });
 })();
