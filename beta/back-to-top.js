@@ -14,7 +14,8 @@
         shadow: true,
         smoothScroll: false,
         scrollDuration: 800,
-        scrollEasing: 'easeInOut'
+        scrollEasing: 'easeInOut',
+        reverse: false // Whether to scroll to bottom instead of top
     };
 
     // Color palette mapping function
@@ -41,7 +42,7 @@
         }
         
         // Create back-to-top button
-        console.info("SquareHero Scroll to Top: Creating back-to-top button");
+        console.info(`SquareHero Scroll to Top: Creating ${settings.reverse ? 'back-to-bottom' : 'back-to-top'} button`);
         const backToTopButton = document.createElement('button');
         backToTopButton.id = 'backToTop';
         
@@ -111,7 +112,7 @@
         
         backToTopButton.innerHTML = `
             <svg class="back-to-top-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 36">
-                <path stroke="${arrowColor}" stroke-miterlimit="10" stroke-width="1.887" d="M15.115 35.4V1.65M1.516 15.1l13.5-13.5 13.5 13.5"/>
+                <path stroke="${arrowColor}" stroke-miterlimit="10" stroke-width="1.887" d="${settings.reverse ? 'M15.115 1.65V35.4M1.516 21.9l13.5 13.5 13.5-13.5' : 'M15.115 35.4V1.65M1.516 15.1l13.5-13.5 13.5 13.5'}"/>
             </svg>
             <svg width="100%" height="100%">
                 <circle cx="50%" cy="50%" r="40%" stroke="${circleColor}" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" class="scroll-ring" id="progressCircle" />
@@ -169,24 +170,48 @@
             const scrollPercent = (scrollPosition / scrollTotal) * 100;
             setProgress(scrollPercent);
 
-            if (scrollPosition > scrollOffset) {
-                backToTopButton.classList.add('visible');
+            if (settings.reverse) {
+                // For scroll to bottom: show when not at bottom
+                const nearBottom = scrollPosition + window.innerHeight + 100 >= document.documentElement.scrollHeight;
+                if (!nearBottom) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
             } else {
-                backToTopButton.classList.remove('visible');
+                // Original behavior: show when scrolled down
+                if (scrollPosition > scrollOffset) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
             }
         });
 
-        // Configure smooth scrolling
+        // Configure button click behavior
         backToTopButton.addEventListener('click', () => {
-            if (settings.smoothScroll !== false) {
-                // If smooth scroll is enabled in settings
-                const duration = settings.scrollDuration || 800;
-                const easing = settings.scrollEasing || 'easeInOut';
-                
-                scrollToTop(duration, easing);
+            if (settings.reverse) {
+                // Scroll to bottom behavior
+                if (settings.smoothScroll !== false) {
+                    const duration = settings.scrollDuration || 800;
+                    const easing = settings.scrollEasing || 'easeInOut';
+                    
+                    scrollToBottom(duration, easing);
+                } else {
+                    // Fallback to basic scrolling to bottom
+                    window.scrollTo(0, document.documentElement.scrollHeight);
+                }
             } else {
-                // Fallback to basic scrolling
-                window.scrollTo(0, 0);
+                // Original scroll to top behavior
+                if (settings.smoothScroll !== false) {
+                    const duration = settings.scrollDuration || 800;
+                    const easing = settings.scrollEasing || 'easeInOut';
+                    
+                    scrollToTop(duration, easing);
+                } else {
+                    // Fallback to basic scrolling
+                    window.scrollTo(0, 0);
+                }
             }
         });
         
@@ -220,6 +245,47 @@
                 }
                 
                 window.scrollTo(0, start * (1 - easingValue));
+                
+                if (time < 1) {
+                    requestAnimationFrame(scroll);
+                }
+            }
+            
+            requestAnimationFrame(scroll);
+        }
+        
+        // Smooth scrolling to bottom implementation with easing
+        function scrollToBottom(duration, easingType) {
+            const start = window.pageYOffset;
+            const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const distance = maxScroll - start;
+            const startTime = 'now' in window.performance ? performance.now() : new Date().getTime();
+            
+            function scroll() {
+                const now = 'now' in window.performance ? performance.now() : new Date().getTime();
+                const time = Math.min(1, ((now - startTime) / duration));
+                
+                let easingValue;
+                
+                // Apply easing function based on settings
+                switch(easingType) {
+                    case 'linear':
+                        easingValue = time;
+                        break;
+                    case 'easeInOut':
+                        easingValue = time < 0.5 ? 2 * time * time : -1 + (4 - 2 * time) * time;
+                        break;
+                    case 'easeIn':
+                        easingValue = time * time;
+                        break;
+                    case 'easeOut':
+                        easingValue = time * (2 - time);
+                        break;
+                    default:
+                        easingValue = time < 0.5 ? 2 * time * time : -1 + (4 - 2 * time) * time; // Default to easeInOut
+                }
+                
+                window.scrollTo(0, start + (distance * easingValue));
                 
                 if (time < 1) {
                     requestAnimationFrame(scroll);
@@ -285,6 +351,14 @@
             // Get settings URL from script tag
             const scriptTag = document.querySelector('script[data-squarehero-plugin="scroll-to-top"]');
             const settingsUrl = scriptTag?.getAttribute('settings');
+            const reverseAttr = scriptTag?.getAttribute('reverse');
+            
+            // Check if reverse mode is enabled via script tag
+            const isReverse = reverseAttr === 'true';
+            if (isReverse) {
+                console.info("SquareHero Scroll to Top: Reverse mode enabled via script tag");
+                defaultSettings.reverse = true;
+            }
             
             if (!settingsUrl) {
                 console.warn("SquareHero Scroll to Top: No settings URL found in script tag, using default settings");
