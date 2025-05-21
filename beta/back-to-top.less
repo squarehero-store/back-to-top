@@ -1,0 +1,70 @@
+// SQUARESPACE COLOUR PALETTE
+@slot-1: ~"hsla(var(--white-hsl), 1)";
+@slot-2: ~"hsla(var(--lightAccent-hsl), 1)";
+@slot-3: ~"hsla(var(--accent-hsl), 1)";
+@slot-4: ~"hsla(var(--darkAccent-hsl), 1)";
+@slot-5: ~"hsla(var(--black-hsl), 1)";
+
+//// BACK TO TOP BUTTON ////
+#backToTop {
+  position: fixed;
+  bottom: 30px;
+  width: 50px;
+  height: 50px;
+  background-color: @slot-5;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 12001;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+// THE ARROW
+.back-to-top-arrow path {
+  stroke:@slot-1
+}
+
+/* Position variants */
+#backToTop.position-right {
+  right: 30px;
+}
+
+#backToTop.position-left {
+  left: 30px;
+}
+
+#backToTop.position-middle {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#backToTop.visible {
+  opacity: 1;
+}
+
+#backToTop svg:first-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  transform: translate(-50%, -50%);
+}
+
+#backToTop svg:nth-child(2) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  .scroll-ring {
+    stroke: @slot-1
+  }
+  
+}
+
+/* Ensure middle position works with the progress circle */
+#backToTop.position-middle svg:first-child {
+  transform: translate(-50%, -50%);
+}
